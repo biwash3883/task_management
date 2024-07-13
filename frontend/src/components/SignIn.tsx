@@ -37,6 +37,7 @@ const SignIn: React.FC = () => {
   });
 
   const onSubmit = async (data: SignInFormData) => {
+    setLoading(true);
     try {
       const res = await api.post("/api/v1/user/login/", {
         ...data,
@@ -48,13 +49,15 @@ const SignIn: React.FC = () => {
         reset();
         setLoading(false);
         toast.success(`User loggedIn successfully`);
-        navigate("/");
+        navigate("/", { state: { username: data.username } });
       }
     } catch (error: any) {
       if (error?.response?.status === 401) {
         toast.error(`${error?.response?.data?.detail}`);
       }
       console.error("loginERROR: ", error);
+    } finally {
+      setLoading(false);
     }
   };
 

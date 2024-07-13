@@ -19,7 +19,7 @@ const NavBar: React.FC = () => {
           </Typography>
           {isAuthorized ? (
             <>
-              <Button color="inherit" component={RouterLink} to="/home">
+              <Button color="inherit" component={RouterLink} to="/">
                 Home
               </Button>
               <Button color="inherit" component={RouterLink} to="/calendar">
