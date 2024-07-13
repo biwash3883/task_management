@@ -1,15 +1,24 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Button, Container, TextField, Typography } from "@mui/material";
-import React from "react";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  TextField,
+  Typography,
+} from "@mui/material";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { z } from "zod";
+import api from "../api";
 
 const registerSchema = z
   .object({
-    userName: z.string().min(3, "User name must be at least 3 characters"),
+    username: z.string().min(3, "User name must be at least 3 characters"),
     password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string(),
+    confirmPassword: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -19,17 +28,40 @@ const registerSchema = z
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 const SignUp: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     mode: "onChange",
   });
 
-  const onSubmit = (data: RegisterFormData) => {
-    console.log(data);
+  const onSubmit = async (data: RegisterFormData) => {
+    setLoading(true);
+    try {
+      const res = await api.post("/api/v1/user/register/", {
+        ...data,
+      });
+
+      if (res.status === 201) {
+        reset();
+        setLoading(false);
+        toast.success(`User registered successfully`);
+        navigate("/login");
+      }
+    } catch (error: any) {
+      if (error?.response?.status === 400) {
+        toast.error(`${error?.response?.data?.username[0]}`);
+      }
+      console.error("registerERROR: ", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -73,13 +105,13 @@ const SignUp: React.FC = () => {
           </Typography>
           <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
             <TextField
-              {...register("userName")}
-              label="User Name"
+              {...register("username")}
+              label="Username"
               variant="outlined"
               margin="normal"
               fullWidth
-              error={!!errors.userName}
-              helperText={errors.userName?.message}
+              error={!!errors.username}
+              helperText={errors.username?.message}
             />
             <TextField
               {...register("password")}
@@ -110,8 +142,10 @@ const SignUp: React.FC = () => {
               color="primary"
               fullWidth
               sx={{ mt: 2 }}
+              disabled={loading}
+              startIcon={loading ? <CircularProgress size={20} /> : null}
             >
-              Register
+              {loading ? "Registering..." : "Register"}
             </Button>
           </form>
         </Box>

@@ -1,29 +1,61 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Button, Container, TextField, Typography } from "@mui/material";
-import React from "react";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  TextField,
+  Typography,
+} from "@mui/material";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { z } from "zod";
+import api from "../api";
+import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 
 const signInSchema = z.object({
-  userName: z.string().min(3, "User name must be at least 3 characters"),
+  username: z.string().min(3, "User name must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 type SignInFormData = z.infer<typeof signInSchema>;
 
 const SignIn: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
     mode: "onChange",
   });
 
-  const onSubmit = (data: SignInFormData) => {
-    console.log(data);
+  const onSubmit = async (data: SignInFormData) => {
+    try {
+      const res = await api.post("/api/v1/user/login/", {
+        ...data,
+      });
+
+      if (res.status === 200) {
+        localStorage.setItem(ACCESS_TOKEN, res?.data?.access);
+        localStorage.setItem(REFRESH_TOKEN, res?.data?.refresh);
+        reset();
+        setLoading(false);
+        toast.success(`User loggedIn successfully`);
+        navigate("/");
+      }
+    } catch (error: any) {
+      if (error?.response?.status === 401) {
+        toast.error(`${error?.response?.data?.detail}`);
+      }
+      console.error("loginERROR: ", error);
+    }
   };
 
   return (
@@ -67,13 +99,13 @@ const SignIn: React.FC = () => {
           </Typography>
           <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
             <TextField
-              {...register("userName")}
-              label="User Name"
+              {...register("username")}
+              label="Username"
               variant="outlined"
               margin="normal"
               fullWidth
-              error={!!errors.userName}
-              helperText={errors.userName?.message}
+              error={!!errors.username}
+              helperText={errors.username?.message}
             />
             <TextField
               {...register("password")}
@@ -94,8 +126,10 @@ const SignIn: React.FC = () => {
               color="primary"
               fullWidth
               sx={{ mt: 2 }}
+              disabled={loading}
+              startIcon={loading ? <CircularProgress size={20} /> : null}
             >
-              Log In
+              {loading ? "Logging..." : "Log In"}
             </Button>
           </form>
         </Box>
