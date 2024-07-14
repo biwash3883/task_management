@@ -20,7 +20,7 @@ import { TaskType } from "../TaskTable";
 
 const taskSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
-  description: z.string().optional(),
+  description: z.string(),
   category: z.enum(["Work", "Personal", "Others"]),
   priority: z.enum(["Low", "Medium", "High"]),
   status: z.enum(["TODO", "IN PROGRESS", "DONE"]),
