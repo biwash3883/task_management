@@ -5,8 +5,10 @@ import {
   Button,
   Fade,
   LinearProgress,
+  MenuItem,
   Modal,
   Paper,
+  Select,
   Stack,
   Table,
   TableBody,
@@ -55,6 +57,10 @@ const TaskTable = () => {
   const [openEdit, setOpenEdit] = useState(false);
   const [openDel, setOpenDel] = useState(false);
   const [delId, setDelId] = useState<number | null>(null);
+
+  const [filterPriority, setFilterPriority] = useState<string>("");
+  const [filterStatus, setFilterStatus] = useState<string>("");
+  const [filterCategory, setFilterCategory] = useState<string>("");
 
   useEffect(() => {
     getAllTasks();
@@ -191,6 +197,13 @@ const TaskTable = () => {
     setOpenEdit(true);
   };
 
+  const filteredTasks = tasks.filter(
+    (task) =>
+      (filterPriority === "" || task.priority === filterPriority) &&
+      (filterStatus === "" || task.status === filterStatus) &&
+      (filterCategory === "" || task.category === filterCategory)
+  );
+
   return (
     <>
       {loading && (
@@ -200,6 +213,41 @@ const TaskTable = () => {
       )}
       <br />
       <Box display="flex" justifyContent="flex-end" mr={3}>
+        <Box display="flex" gap={2} alignItems="center" mr={2}>
+          <Select
+            value={filterPriority}
+            onChange={(e) => setFilterPriority(e.target.value)}
+            displayEmpty
+            sx={{ width: 150 }}
+          >
+            <MenuItem value="">All Priorities</MenuItem>
+            <MenuItem value="Low">Low</MenuItem>
+            <MenuItem value="Medium">Medium</MenuItem>
+            <MenuItem value="High">High</MenuItem>
+          </Select>
+          <Select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            displayEmpty
+            sx={{ width: 150 }}
+          >
+            <MenuItem value="">All Statuses</MenuItem>
+            <MenuItem value="TODO">To Do</MenuItem>
+            <MenuItem value="IN PROGRESS">In Progress</MenuItem>
+            <MenuItem value="DONE">Done</MenuItem>
+          </Select>
+          <Select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            displayEmpty
+            sx={{ width: 150 }}
+          >
+            <MenuItem value="">All Categories</MenuItem>
+            <MenuItem value="Work">Work</MenuItem>
+            <MenuItem value="Personal">Personal</MenuItem>
+            <MenuItem value="Others">Others</MenuItem>
+          </Select>
+        </Box>
         <Button variant="contained" onClick={handleOpen}>
           Create Task
         </Button>
@@ -222,7 +270,7 @@ const TaskTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {tasks.length === 0 ? (
+              {filteredTasks.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} align="center">
                     <Typography variant="h6" className="customFont">
@@ -231,7 +279,7 @@ const TaskTable = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                tasks
+                filteredTasks
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row, index) => (
                     <TableRow hover role="checkbox" tabIndex={-1} key={index}>

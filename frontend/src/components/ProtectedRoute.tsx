@@ -14,7 +14,14 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
 
   if (isAuthorized === null) {
     return (
-      <Box sx={{ display: "flex" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
         <CircularProgress />
       </Box>
     );
