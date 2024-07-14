@@ -1,14 +1,9 @@
 import { createTheme, ThemeProvider } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import {
-  Navigate,
-  Route,
-  BrowserRouter as Router,
-  Routes,
-} from "react-router-dom";
-import { toast, Toaster } from "sonner";
-import { AuthProvider } from "./components/AuthContext";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Toaster } from "sonner";
+import { AuthProvider, useAuth } from "./components/AuthContext";
 import Dashboard from "./components/dashboard";
 import BasicCalendar from "./components/dashboard/calendar/BasicCalendar";
 import NavBar from "./components/NavBar";
@@ -28,18 +23,13 @@ const theme = createTheme({
   },
 });
 
-function LogOut() {
-  localStorage.clear();
-  toast.info("User Logged Out 👋");
-  return <Navigate to="/login" />;
-}
-
 function RegisterAndLogOut() {
   localStorage.clear();
   return <SignUp />;
 }
 
 const App = () => {
+  const { LogOut } = useAuth();
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

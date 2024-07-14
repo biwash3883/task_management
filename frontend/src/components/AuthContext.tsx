@@ -1,11 +1,14 @@
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { createContext, useContext, useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
+import { toast } from "sonner";
 import api from "../api";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 
 interface AuthContextType {
   isAuthorized: boolean | null;
   checkAuthorization: () => void;
+  LogOut: () => JSX.Element;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -68,8 +71,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const LogOut = () => {
+    localStorage.clear();
+    setIsAuthorized(false);
+    toast.info("User Logged Out 👋");
+    return <Navigate to="/login" />;
+  };
+
   return (
-    <AuthContext.Provider value={{ isAuthorized, checkAuthorization }}>
+    <AuthContext.Provider value={{ isAuthorized, checkAuthorization, LogOut }}>
       {children}
     </AuthContext.Provider>
   );
