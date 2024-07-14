@@ -20,6 +20,18 @@ This Task Management System is a full-stack web application designed for efficie
 - **API Communication**: RESTful API
 - **Test**: Vitest, react-testing-library
 
+## Screenshots
+
+![Register Page](/screenshots/taskRegister.png)
+
+![Login Page](/screenshots/taskLogin.png)
+
+![Dashboard Page](/screenshots/taskdashboard.png)
+
+![Create Task Form](/screenshots/taskcreate.png)
+
+![Calendar View](/screenshots/taskcalendar.png)
+
 ## Getting Started
 
 To get started with the Task Management System, follow these steps:
