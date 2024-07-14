@@ -182,6 +182,9 @@ const TaskTable = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  const [openEdit, setOpenEdit] = useState(false);
+  const handleEditClose = () => setOpenEdit(false);
+
   const [openDel, setOpenDel] = useState(false);
   const [delId, setDelId] = useState<number>(0);
   const handleDelClose = () => setOpenDel(false);
@@ -225,9 +228,9 @@ const TaskTable = () => {
     } catch (error) {
       console.error("deleteTaskERROR: ", error);
     } finally {
-      getAllTasks();
       setLoading(false);
       setOpenDel(false);
+      getAllTasks();
     }
   };
 
@@ -235,7 +238,6 @@ const TaskTable = () => {
     setLoading(true);
     try {
       const res = await api.post("/api/v1/tasks/", data);
-      console.log(res);
       if (res?.status === 201) {
         toast.success(`Task created successfully`);
         handleClose();
@@ -244,6 +246,26 @@ const TaskTable = () => {
       console.error("createTaskERROR: ", error);
     } finally {
       setLoading(false);
+      getAllTasks();
+    }
+  };
+
+  const editTask = async (data: CreateTaskFormType) => {
+    setLoading(true);
+    try {
+      const res = await api.patch(
+        `/api/v1/tasks/edit/${selectedTask?.id}/`,
+        data
+      );
+      console.log(res);
+      if (res?.status === 200) {
+        toast.success(`Task edited successfully`);
+      }
+    } catch (error) {
+      console.error("editTaskERROR: ", error);
+    } finally {
+      setLoading(false);
+      handleEditClose();
       getAllTasks();
     }
   };
@@ -275,7 +297,7 @@ const TaskTable = () => {
   const handleEditModal = (data: TaskType) => {
     console.log(data);
     setSelectedTask(data);
-    handleOpen();
+    setOpenEdit(true);
   };
 
   return (
@@ -373,9 +395,26 @@ const TaskTable = () => {
             }}
           >
             <Box sx={{ width: "100%", maxWidth: 600 }}>
+              <CreateTaskForm onClose={handleClose} createTask={createTask} />
+            </Box>
+          </Box>
+        </Fade>
+      </Modal>
+      {/* edit form  */}
+      <Modal open={openEdit} onClose={handleEditClose} closeAfterTransition>
+        <Fade in={openEdit}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100vh",
+            }}
+          >
+            <Box sx={{ width: "100%", maxWidth: 600 }}>
               <CreateTaskForm
-                onClose={handleClose}
-                createTask={createTask}
+                onClose={handleEditClose}
+                createTask={editTask}
                 defaultValues={selectedTask}
               />
             </Box>

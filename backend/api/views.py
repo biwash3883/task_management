@@ -19,7 +19,6 @@ class CreateTaskListView(generics.ListCreateAPIView):
         user = self.request.user
         return Task.objects.filter(author = user)
     
-    # 43:29 - tech with tim 
     def perform_create(self, serializer):
         if serializer.is_valid():
             serializer.save(author = self.request.user)
@@ -34,3 +33,17 @@ class DeleteTask(generics.DestroyAPIView):
     def get_queryset(self):
         user = self.request.user
         return Task.objects.filter(author = user)
+
+class EditTaskView(generics.RetrieveUpdateAPIView):
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Task.objects.filter(author=user)
+    
+    def perform_update(self, serializer):
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            print(serializer.errors)
