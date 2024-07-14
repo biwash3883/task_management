@@ -83,7 +83,3 @@ To start the backend of the project, follow these steps:
 ## License
 
 This project is licensed under the [MIT License](https://github.com/git/git-scm.com/blob/main/MIT-LICENSE.txt).
-
-```
-
-```
