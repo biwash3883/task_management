@@ -1,10 +1,11 @@
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import DeleteIcon from "@mui/icons-material/Delete";
-import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import {
   Box,
   Button,
+  Fade,
   LinearProgress,
+  Modal,
   Paper,
   Stack,
   Table,
@@ -16,20 +17,23 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import api from "../../api";
+import { ConfirmationModal } from "../Utils/ConfirmationModal";
+import CreateTaskForm, { CreateTaskFormType } from "./taskForm/CreateTaskForm";
 
-interface TaskType {
+export interface TaskType {
+  id: number;
   title: string;
   description: string;
   category: "Work" | "Personal" | "Others";
   priority: "Low" | "Medium" | "High"; // Low, Medium, High
-  status: "To Do" | "In Progress" | "Done"; // To Do, In Progress, Done
+  status: "TODO" | "IN PROGRESS" | "DONE"; // To Do, In Progress, Done
   due_date: string; // Format: YYYY-MM-DD
   created_at: string; // ISO 8601 string representation
   updated_at: string; // ISO 8601 string representation
-  author: string;
+  author: number;
 }
 
 interface Column {
@@ -42,81 +46,86 @@ interface Column {
 
 const data: TaskType[] = [
   {
+    id: 1,
     title: "Implement Login Functionality",
     description:
       "Develop login feature with authentication and session management",
     category: "Work",
     priority: "High",
-    status: "In Progress",
+    status: "IN PROGRESS",
     due_date: "2024-07-20",
     created_at: "2024-07-13T08:30:00Z",
     updated_at: "2024-07-13T15:45:00Z",
-    author: "kishor",
+    author: 2,
   },
   {
+    id: 2,
     title: "Design User Interface",
     description: "Create UI wireframes and prototypes for user interaction",
     category: "Personal",
     priority: "Medium",
-    status: "To Do",
+    status: "TODO",
     due_date: "2024-07-18",
     created_at: "2024-07-12T10:15:00Z",
     updated_at: "2024-07-13T09:30:00Z",
-    author: "kishor",
+    author: 2,
   },
   {
+    id: 3,
     title: "Write Documentation",
     description: "Document project architecture and API specifications",
     category: "Others",
     priority: "Low",
-    status: "To Do",
+    status: "TODO",
     due_date: "2024-07-25",
     created_at: "2024-07-11T14:00:00Z",
     updated_at: "2024-07-13T11:45:00Z",
-    author: "kishor",
+    author: 2,
   },
   {
+    id: 4,
     title: "Fix Bugs in Backend",
     description: "Resolve critical issues reported in backend functionality",
     category: "Work",
     priority: "High",
-    status: "In Progress",
+    status: "IN PROGRESS",
     due_date: "2024-07-22",
     created_at: "2024-07-10T16:45:00Z",
     updated_at: "2024-07-13T14:20:00Z",
-    author: "kishor",
+    author: 2,
   },
   {
+    id: 5,
     title: "Deploy Application to Production",
     description:
       "Prepare application deployment and configure production environment",
     category: "Personal",
     priority: "Medium",
-    status: "Done",
+    status: "DONE",
     due_date: "2024-07-30",
     created_at: "2024-07-09T11:00:00Z",
     updated_at: "2024-07-13T13:00:00Z",
-    author: "kishor",
+    author: 2,
   },
 ];
 
 const getStatus = (status: string) => {
   switch (status) {
-    case "To Do":
+    case "TODO":
       return (
         <Button variant="contained" color="error">
           {status}
         </Button>
       );
 
-    case "In Progress":
+    case "IN PROGRESS":
       return (
         <Button variant="contained" color="warning">
           {status}
         </Button>
       );
 
-    case "Done":
+    case "DONE":
       return (
         <Button variant="contained" color="success">
           {status}
@@ -125,13 +134,57 @@ const getStatus = (status: string) => {
   }
 };
 
+const getPriority = (priority: string) => {
+  switch (priority) {
+    case "High":
+      return (
+        <Typography variant="button" display="block" gutterBottom color={"red"}>
+          {priority}
+        </Typography>
+      );
+
+    case "Medium":
+      return (
+        <Typography
+          variant="button"
+          display="block"
+          gutterBottom
+          color={"orange"}
+        >
+          {priority}
+        </Typography>
+      );
+
+    case "Low":
+      return (
+        <Typography
+          variant="button"
+          display="block"
+          gutterBottom
+          color={"green"}
+        >
+          {priority}
+        </Typography>
+      );
+  }
+};
+
 const TaskTable = () => {
-  const [tasks, setTasks] = useState<TaskType[] | []>(data);
+  const [tasks, setTasks] = useState<TaskType[] | []>([]);
+  const [selectedTask, setSelectedTask] = useState<TaskType>();
   console.log(tasks);
 
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const [openDel, setOpenDel] = useState(false);
+  const [delId, setDelId] = useState<number>(0);
+  const handleDelClose = () => setOpenDel(false);
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -144,15 +197,14 @@ const TaskTable = () => {
     setPage(0);
   };
 
-  // useEffect(() => {
-  //   getAllTasks();
-  // }, []);
+  useEffect(() => {
+    getAllTasks();
+  }, []);
 
   const getAllTasks = async () => {
     setLoading(true);
     try {
       const res = await api.get("/api/v1/tasks/");
-      console.log(res);
       if (res.status === 200) {
         setTasks(res?.data);
       }
@@ -167,20 +219,26 @@ const TaskTable = () => {
     setLoading(true);
     try {
       const res = await api.delete(`/api/v1/tasks/delete/${id}/`);
-      console.log(res, "delRES");
+      if (res?.status === 204) {
+        toast.success(`Task deleted successfully`);
+      }
     } catch (error) {
       console.error("deleteTaskERROR: ", error);
     } finally {
+      getAllTasks();
       setLoading(false);
+      setOpenDel(false);
     }
   };
 
-  const createTask = async () => {
+  const createTask = async (data: CreateTaskFormType) => {
     setLoading(true);
     try {
-      const res = await api.post("/api/v1/tasks/");
+      const res = await api.post("/api/v1/tasks/", data);
+      console.log(res);
       if (res?.status === 201) {
         toast.success(`Task created successfully`);
+        handleClose();
       }
     } catch (error) {
       console.error("createTaskERROR: ", error);
@@ -200,6 +258,7 @@ const TaskTable = () => {
     {
       id: "priority",
       label: "Priority",
+      format: (value: string) => getPriority(value),
     },
     {
       id: "status",
@@ -207,6 +266,18 @@ const TaskTable = () => {
       format: (value: string) => getStatus(value),
     },
   ];
+
+  const handleDelModal = (id: number) => {
+    setOpenDel(true);
+    setDelId(id);
+  };
+
+  const handleEditModal = (data: TaskType) => {
+    console.log(data);
+    setSelectedTask(data);
+    handleOpen();
+  };
+
   return (
     <>
       {loading && (
@@ -216,7 +287,9 @@ const TaskTable = () => {
       )}
       <br />
       <Box display="flex" justifyContent="flex-end" mr={3}>
-        <Button variant="contained">Create Task</Button>
+        <Button variant="contained" onClick={handleOpen}>
+          Create Task
+        </Button>
       </Box>
       <Paper sx={{ width: "100%", overflow: "hidden" }}>
         <TableContainer sx={{ maxHeight: 600 }}>
@@ -260,17 +333,15 @@ const TaskTable = () => {
                         })}
                         <TableCell>
                           <Stack direction="row" spacing={3}>
-                            <RemoveRedEyeIcon
-                              sx={{ cursor: "pointer" }}
-                              color="secondary"
-                            />
                             <BorderColorIcon
                               sx={{ cursor: "pointer" }}
                               color="primary"
+                              onClick={() => handleEditModal(row)}
                             />
                             <DeleteIcon
                               sx={{ cursor: "pointer" }}
                               color="error"
+                              onClick={() => handleDelModal(row?.id)}
                             />
                           </Stack>
                         </TableCell>
@@ -291,6 +362,31 @@ const TaskTable = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
+      <Modal open={open} onClose={handleClose} closeAfterTransition>
+        <Fade in={open}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100vh",
+            }}
+          >
+            <Box sx={{ width: "100%", maxWidth: 600 }}>
+              <CreateTaskForm
+                onClose={handleClose}
+                createTask={createTask}
+                defaultValues={selectedTask}
+              />
+            </Box>
+          </Box>
+        </Fade>
+      </Modal>
+      <ConfirmationModal
+        open={openDel}
+        onClose={handleDelClose}
+        onConfirm={() => deleteTask(delId)}
+      />
     </>
   );
 };

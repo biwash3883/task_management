@@ -34,7 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setIsAuthorized(false);
         return;
       }
-      const decodedToken: JwtPayload = jwtDecode(token);
+      const decodedToken = jwtDecode<JwtPayload>(token);
       const tokenExpiry = decodedToken?.exp;
       const now = Date.now() / 1000;
 
@@ -55,6 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const res = await api.post("/api/v1/token/refresh", {
         refresh: refreshToken,
       });
+      console.log(res, "refresh token");
       if (res.status === 200) {
         localStorage.setItem(ACCESS_TOKEN, res.data.access);
         setIsAuthorized(true);

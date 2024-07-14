@@ -1,11 +1,7 @@
 import { Card, CardContent, Grid, Typography } from "@mui/material";
 import React from "react";
 
-interface WelcomeCardProps {
-  username: string;
-}
-
-export const WelcomeCard: React.FC<WelcomeCardProps> = ({ username }) => {
+export const WelcomeCard: React.FC = () => {
   return (
     <Grid container justifyContent="center">
       <Grid item xs={12} sm={8} md={6} lg={6}>
@@ -24,7 +20,7 @@ export const WelcomeCard: React.FC<WelcomeCardProps> = ({ username }) => {
         >
           <CardContent>
             <Typography variant="h4" component="div" gutterBottom>
-              Welcome back, {username}
+              Welcome back,
             </Typography>
             <Typography variant="body1">
               Your tasks are waiting for you!

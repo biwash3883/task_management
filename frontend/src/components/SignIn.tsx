@@ -42,14 +42,14 @@ const SignIn: React.FC = () => {
       const res = await api.post("/api/v1/user/login/", {
         ...data,
       });
-
+      console.log(res, "login");
       if (res.status === 200) {
         localStorage.setItem(ACCESS_TOKEN, res?.data?.access);
         localStorage.setItem(REFRESH_TOKEN, res?.data?.refresh);
-        reset();
         setLoading(false);
         toast.success(`User loggedIn successfully`);
-        navigate("/", { state: { username: data.username } });
+        navigate("/");
+        reset();
       }
     } catch (error: any) {
       if (error?.response?.status === 401) {
