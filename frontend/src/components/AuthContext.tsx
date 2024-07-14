@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const refreshToken = async () => {
     try {
       const refreshToken = localStorage.getItem(REFRESH_TOKEN);
-      const res = await api.post("/api/v1/token/refresh", {
+      const res = await api.post("/api/v1/token/refresh/", {
         refresh: refreshToken,
       });
       console.log(res, "refresh token");

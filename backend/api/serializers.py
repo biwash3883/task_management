@@ -17,3 +17,12 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = ['id', 'title', 'description', 'category', 'priority', 'status', 'due_date', 'created_at', 'updated_at', 'author']
         extra_kwargs = {'author': {'read_only': True}}
+
+class TaskEventSerializer(serializers.ModelSerializer):
+    title = serializers.CharField()
+    start = serializers.DateField(source='due_date')
+    end = serializers.DateField(source='due_date')
+
+    class Meta:
+        model = Task
+        fields = ['title', 'start', 'end']

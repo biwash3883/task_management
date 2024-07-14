@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from rest_framework import generics
-from .serializers import UserSerializer, TaskSerializer
+from .serializers import UserSerializer, TaskSerializer, TaskEventSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Task
 
@@ -47,3 +47,11 @@ class EditTaskView(generics.RetrieveUpdateAPIView):
             serializer.save()
         else:
             print(serializer.errors)
+
+class GetEventsView(generics.ListAPIView):
+    serializer_class = TaskEventSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Task.objects.filter(author = user)

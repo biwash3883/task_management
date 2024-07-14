@@ -1,4 +1,6 @@
-import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material";
+import CssBaseline from "@mui/material/CssBaseline";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 import {
   Navigate,
   Route,
@@ -8,6 +10,7 @@ import {
 import { toast, Toaster } from "sonner";
 import { AuthProvider } from "./components/AuthContext";
 import Dashboard from "./components/dashboard";
+import BasicCalendar from "./components/dashboard/calendar/BasicCalendar";
 import NavBar from "./components/NavBar";
 import NotFound from "./components/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -49,6 +52,14 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/calendar"
+              element={
+                <ProtectedRoute>
+                  <BasicCalendar />
                 </ProtectedRoute>
               }
             />
