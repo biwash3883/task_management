@@ -1,3 +1,4 @@
+import React from "react";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
@@ -5,13 +6,15 @@ import { toast } from "sonner";
 import api from "../api";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 
-interface AuthContextType {
+export interface AuthContextType {
   isAuthorized: boolean | null;
   checkAuthorization: () => void;
   LogOut: () => JSX.Element;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);

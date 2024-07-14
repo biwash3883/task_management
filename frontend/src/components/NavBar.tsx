@@ -19,22 +19,47 @@ const NavBar: React.FC = () => {
           </Typography>
           {isAuthorized ? (
             <>
-              <Button color="inherit" component={RouterLink} to="/">
+              <Button
+                color="inherit"
+                component={RouterLink}
+                to="/"
+                data-testid="homeBtn"
+              >
                 Home
               </Button>
-              <Button color="inherit" component={RouterLink} to="/calendar">
+              <Button
+                color="inherit"
+                component={RouterLink}
+                to="/calendar"
+                data-testid="calendarBtn"
+              >
                 Calendar
               </Button>
-              <Button color="inherit" component={RouterLink} to="/logout">
+              <Button
+                color="inherit"
+                component={RouterLink}
+                to="/logout"
+                data-testid="logoutBtn"
+              >
                 LogOut
               </Button>
             </>
           ) : (
             <>
-              <Button color="inherit" component={RouterLink} to="/login">
+              <Button
+                color="inherit"
+                component={RouterLink}
+                to="/login"
+                data-testid="loginBtn"
+              >
                 Login
               </Button>
-              <Button color="inherit" component={RouterLink} to="/register">
+              <Button
+                color="inherit"
+                component={RouterLink}
+                to="/register"
+                data-testid="registerBtn"
+              >
                 Register
               </Button>
             </>
