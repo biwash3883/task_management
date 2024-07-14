@@ -33,7 +33,7 @@ export default function BasicCalendar() {
           <CircularProgress />
         </Box>
       )}
-      <Box sx={{ height: "95vh", p: 2 }}>
+      <Box sx={{ height: "90vh", p: 2 }}>
         <Calendar events={events} views={["month"]} defaultView={"month"} />;
       </Box>
     </>
