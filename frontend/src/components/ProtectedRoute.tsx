@@ -1,5 +1,5 @@
 import { Box, CircularProgress } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 
@@ -7,12 +7,18 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { isAuthorized, checkAuthorization } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    checkAuthorization();
+    const checkAuth = async () => {
+      await checkAuthorization();
+      setIsLoading(false);
+    };
+
+    checkAuth();
   }, [checkAuthorization]);
 
-  if (isAuthorized === null) {
+  if (isLoading || isAuthorized === null) {
     return (
       <Box
         sx={{

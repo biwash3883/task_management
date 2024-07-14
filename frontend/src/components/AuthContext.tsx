@@ -38,16 +38,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const token = localStorage.getItem(ACCESS_TOKEN);
       if (!token) {
         setIsAuthorized(false);
-        return;
-      }
-      const decodedToken = jwtDecode<JwtPayload>(token);
-      const tokenExpiry = decodedToken?.exp;
-      const now = Date.now() / 1000;
-
-      if (tokenExpiry && tokenExpiry < now) {
-        await refreshToken();
       } else {
-        setIsAuthorized(true);
+        const decodedToken = jwtDecode<JwtPayload>(token);
+        const tokenExpiry = decodedToken?.exp;
+        const now = Date.now() / 1000;
+
+        if (tokenExpiry && tokenExpiry < now) {
+          await refreshToken();
+        } else {
+          setIsAuthorized(true);
+        }
       }
     } catch (error) {
       setIsAuthorized(false);
